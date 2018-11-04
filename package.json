@@ -1,14 +1,22 @@
 {
   "name": "uow-template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An util for Unit of Work pattern implementation",
   "author": "pilagod <pilagooood@gmail.com>",
   "license": "MIT",
-  "tags": [
+  "keywords": [
     "transaction",
     "unit-of-work",
     "unit-of-work-pattern"
   ],
+  "homepage": "https://github.com/pilagod/uow-template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pilagod/uow-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pilagod/uow-template/issues"
+  },
   "main": "index.js",
   "scripts": {
     "build": "rimraf ./dist && tsc",

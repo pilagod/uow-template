@@ -1,4 +1,5 @@
 uow-template
+[![Build Status](https://travis-ci.org/pilagod/uow-template.svg?branch=master)](https://travis-ci.org/pilagod/uow-template)
 ============
 
 An util for Unit of Work pattern implementation

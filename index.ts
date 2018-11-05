@@ -90,11 +90,11 @@ export abstract class UnitOfWorkTemplate<Tx> implements UnitOfWork {
     const tx = await this.begin()
 
     try {
-      await Promise.all([
-        this.commitCreates(tx),
-        this.commitUpdates(tx),
-        this.commitDeletes(tx),
-      ])
+      // for the possibility of multiple db manipulations in each action,
+      // actions should wait for others to finish before continuing
+      await this.commitCreates(tx)
+      await this.commitUpdates(tx)
+      await this.commitDeletes(tx)
       await this.commit(tx)
     } catch (e) {
       await this.rollback(tx)

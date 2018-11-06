@@ -5,12 +5,21 @@ uow-template
 
 An util for Unit of Work pattern implementation
 
+@CAVEAT: This is an **abstract** util for Unit of Work, to bridge this into real world, please check out the [Examples](#Examples) section.
+
 Installation
 ------------
 
 ```sh
 npm install uow-template
 ```
+
+Examples
+--------
+
+There are some pacakges demonstrates how to use and take advantage of `uow-template`:
+
+* [uow-typeorm](https://github.com/pilagod/uow-typeorm)
 
 License
 -------

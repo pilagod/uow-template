@@ -184,20 +184,22 @@ describe('uow', () => {
       expect(uowCommit.calledAfter(objDeleteByTx)).toBe(true)
     })
 
-    it('should call uow rollback with tx when error occurs', async () => {
+    it('should call uow rollback with tx and throw error when error occurs', async () => {
       const uow = new Uow(tx)
       const uowRollback = sinon.spy(uow, 'rollback')
       const obj = new UowObject()
+      const updateError = new Error('An error occurs while updating')
 
-      sinon.stub(obj, 'updateByTx').throws(
-        new Error('An error occurs while updating')
-      )
+      sinon.stub(obj, 'updateByTx').throws(updateError)
+
       uow.beginWork()
       await uow.create(obj)
       await uow.update(obj)
       await uow.delete(obj)
-      await uow.commitWork()
 
+      const checkCommitFail = () => uow.commitWork()
+
+      await expect(checkCommitFail()).rejects.toThrow(updateError)
       expect(uowRollback.callCount).toBe(1)
       expect(uowRollback.calledWithExactly(tx)).toBe(true)
     })
@@ -236,13 +238,15 @@ describe('uow', () => {
       const uowRollback = sinon.spy(uow, 'rollback')
       const uowRelease = sinon.spy(uow, 'release')
       const obj = new UowObject()
+      const createError = new Error('An error occurs while creating')
 
-      sinon.stub(obj, 'createByTx').throws(
-        new Error('An error occurs while creating')
-      )
+      sinon.stub(obj, 'createByTx').throws(createError)
+
       uow.beginWork()
       await uow.create(obj)
-      await uow.commitWork()
+      try {
+        await uow.commitWork()
+      } catch (e) {}
 
       expect(uowRelease.callCount).toBe(1)
       expect(uowRelease.calledWithExactly(tx)).toBe(true)
@@ -267,12 +271,14 @@ describe('uow', () => {
     it('should reset uow state when commit fails', async () => {
       const uow = new Uow(tx)
       const obj = new UowObject()
-      const objCreateByTx = sinon.stub(obj, 'createByTx').throws(
-        new Error('An error occurs while creating')
-      )
+      const createError = new Error('An error occurs while creating')
+      const objCreateByTx = sinon.stub(obj, 'createByTx').throws(createError)
+
       uow.beginWork()
       await uow.create(obj)
-      await uow.commitWork()
+      try {
+        await uow.commitWork()
+      } catch (e) {}
 
       uow.beginWork()
       await uow.commitWork()

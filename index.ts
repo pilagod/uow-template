@@ -98,6 +98,7 @@ export abstract class UnitOfWorkTemplate<Tx> implements UnitOfWork {
       await this.commit(tx)
     } catch (e) {
       await this.rollback(tx)
+      throw e
     } finally {
       await this.release(tx)
       this.dispose()

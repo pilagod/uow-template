@@ -1,6 +1,6 @@
 {
   "name": "uow-template",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "An util for Unit of Work pattern implementation",
   "author": "pilagod <pilagooood@gmail.com>",
   "license": "MIT",

@@ -90,8 +90,8 @@ export abstract class UnitOfWorkTemplate<Tx> implements UnitOfWork {
     const tx = await this.begin()
 
     try {
-      // for the possibility of multiple db manipulations in each action,
-      // actions should wait for others to finish before continuing
+      // for the possibility of multiple db manipulations in each commit,
+      // commits should wait for others to finish before continuing
       await this.commitCreates(tx)
       await this.commitUpdates(tx)
       await this.commitDeletes(tx)

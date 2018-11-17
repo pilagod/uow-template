@@ -1,12 +1,12 @@
 export interface UnitOfWork {
-  beginWork(): void
-  commitWork(): Promise<void>
+  beginWork (): void
+  commitWork (): Promise<void>
 }
 
 export interface UowObject<Tx> {
-  createByTx(tx: Tx): Promise<void>
-  updateByTx(tx: Tx): Promise<void>
-  deleteByTx(tx: Tx): Promise<void>
+  createByTx (tx: Tx): Promise<void>
+  updateByTx (tx: Tx): Promise<void>
+  deleteByTx (tx: Tx): Promise<void>
 }
 
 export abstract class Uow<Tx> implements UnitOfWork {
@@ -20,65 +20,65 @@ export abstract class Uow<Tx> implements UnitOfWork {
   /**
    * begin begins a new transaction
    */
-  protected abstract begin(): Promise<Tx> 
+  protected abstract begin (): Promise<Tx>
 
   /**
    * commit commits a transaction
    */
-  protected abstract commit(tx: Tx): Promise<void> 
+  protected abstract commit (tx: Tx): Promise<void>
 
-  /** 
+  /**
    * rollback rollbacks a transaction
    */
-  protected abstract rollback(tx: Tx): Promise<void>
+  protected abstract rollback (tx: Tx): Promise<void>
 
-  /** 
+  /**
    * release releases a transaction (should be overridden if needed)
    */
-  protected release(tx: Tx): Promise<void> {
+  protected release (tx: Tx): Promise<void> {
     return Promise.resolve()
   }
 
-  /** 
+  /**
    * beginWork begins a transaction in this unit of work
    */
-  public beginWork(): void {
+  public beginWork (): void {
     this.isActive = true
   }
 
-  /** 
+  /**
    * commitWork commits all actions in this unit of work
    */
-  public commitWork(): Promise<void> {
+  public commitWork (): Promise<void> {
     return this.commitChanges()
   }
 
   /* protected */
 
-  /** 
+  /**
    * markCreate caches object which is going to be created
    */
-  protected markCreate(uowObj: UowObject<Tx>): Promise<void> {
+  protected markCreate (uowObj: UowObject<Tx>): Promise<void> {
     return this.mark(() => this.creates.push(uowObj))
   }
 
-  /** 
+  /**
    * markUpdate caches object which is going to be updated
    */
-  protected markUpdate(uowObj: UowObject<Tx>): Promise<void> {
+  protected markUpdate (uowObj: UowObject<Tx>): Promise<void> {
     return this.mark(() => this.updates.push(uowObj))
   }
 
-  /** 
+  /**
    * markDelete caches object which is going to be deleted
    */
-  protected markDelete(uowObj: UowObject<Tx>): Promise<void> {
+  protected markDelete (uowObj: UowObject<Tx>): Promise<void> {
     return this.mark(() => this.deletes.push(uowObj))
   }
 
   /* private */
 
-  private async mark(mark: () => void): Promise<void> {
+  private async mark (mark: () => void): Promise<void> {
     mark()
 
     if (!this.isActive) {
@@ -86,7 +86,7 @@ export abstract class Uow<Tx> implements UnitOfWork {
     }
   }
 
-  private async commitChanges(): Promise<void> {
+  private async commitChanges (): Promise<void> {
     const tx = await this.begin()
 
     try {
@@ -105,19 +105,19 @@ export abstract class Uow<Tx> implements UnitOfWork {
     }
   }
 
-  private async commitCreates(tx: Tx): Promise<void> {
+  private async commitCreates (tx: Tx): Promise<void> {
     await Promise.all(this.creates.map(m => m.createByTx(tx)))
   }
 
-  private async commitUpdates(tx: Tx): Promise<void> {
+  private async commitUpdates (tx: Tx): Promise<void> {
     await Promise.all(this.updates.map(m => m.updateByTx(tx)))
   }
 
-  private async commitDeletes(tx: Tx): Promise<void> {
+  private async commitDeletes (tx: Tx): Promise<void> {
     await Promise.all(this.deletes.map(m => m.deleteByTx(tx)))
   }
 
-  private dispose() {
+  private dispose () {
     this.creates = []
     this.updates = []
     this.deletes = []

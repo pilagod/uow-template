@@ -1,46 +1,46 @@
 import sinon from 'sinon'
-import { 
+import {
   Uow,
-  UowObject,
+  UowObject
 } from './'
 
 type Tx = any
 
 class UowObjectImpl implements UowObject<Tx> {
-  public createByTx() {
-    return Promise.resolve()    
-  }
-  public updateByTx() {
+  public createByTx () {
     return Promise.resolve()
   }
-  public deleteByTx() {
+  public updateByTx () {
+    return Promise.resolve()
+  }
+  public deleteByTx () {
     return Promise.resolve()
   }
 }
 
 class UowImpl extends Uow<Tx> {
-  public constructor(public tx: Tx) {
+  public constructor (public tx: Tx) {
     super()
   }
-  public begin() {
+  public begin () {
     return Promise.resolve(this.tx)
   }
-  public commit() {
+  public commit () {
     return Promise.resolve()
   }
-  public rollback() {
+  public rollback () {
     return Promise.resolve()
   }
-  public release(tx: Tx) {
+  public release (tx: Tx) {
     return super.release(tx)
   }
-  public create(obj: UowObject<Tx>) {
+  public create (obj: UowObject<Tx>) {
     return this.markCreate(obj)
   }
-  public update(obj: UowObject<Tx>) {
+  public update (obj: UowObject<Tx>) {
     return this.markUpdate(obj)
   }
-  public delete(obj: UowObject<Tx>) {
+  public delete (obj: UowObject<Tx>) {
     return this.markDelete(obj)
   }
 }
@@ -245,8 +245,9 @@ describe('uow', () => {
       await uow.create(obj)
       try {
         await uow.commitWork()
-      } catch (e) {}
-
+      } catch (e) {
+        // catch error to keep test going
+      }
       expect(uowRelease.callCount).toBe(1)
       expect(uowRelease.calledWithExactly(tx)).toBe(true)
       expect(uowRelease.calledAfter(uowRollback)).toBe(true)
@@ -255,8 +256,8 @@ describe('uow', () => {
     it('should reset uow state when commit succeeds', async () => {
       const uow = new UowImpl(tx)
       const obj = new UowObjectImpl()
-      const objCreateByTx = sinon.spy(obj, 'createByTx') 
-      
+      const objCreateByTx = sinon.spy(obj, 'createByTx')
+
       uow.beginWork()
       await uow.create(obj)
       await uow.commitWork()
@@ -277,8 +278,9 @@ describe('uow', () => {
       await uow.create(obj)
       try {
         await uow.commitWork()
-      } catch (e) {}
-
+      } catch (e) {
+        // catch error to keep test going
+      }
       uow.beginWork()
       await uow.commitWork()
 

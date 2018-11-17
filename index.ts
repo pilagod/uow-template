@@ -3,16 +3,16 @@ export interface UnitOfWork {
   commitWork(): Promise<void>
 }
 
-export interface UnitOfWorkObject<Tx> {
+export interface UowObject<Tx> {
   createByTx(tx: Tx): Promise<void>
   updateByTx(tx: Tx): Promise<void>
   deleteByTx(tx: Tx): Promise<void>
 }
 
-export abstract class UnitOfWorkTemplate<Tx> implements UnitOfWork {
-  private creates: UnitOfWorkObject<Tx>[] = []
-  private updates: UnitOfWorkObject<Tx>[] = []
-  private deletes: UnitOfWorkObject<Tx>[] = []
+export abstract class Uow<Tx> implements UnitOfWork {
+  private creates: UowObject<Tx>[] = []
+  private updates: UowObject<Tx>[] = []
+  private deletes: UowObject<Tx>[] = []
   private isActive: boolean = false
 
   /* abstract */
@@ -58,21 +58,21 @@ export abstract class UnitOfWorkTemplate<Tx> implements UnitOfWork {
   /** 
    * markCreate caches object which is going to be created
    */
-  protected markCreate(uowObj: UnitOfWorkObject<Tx>): Promise<void> {
+  protected markCreate(uowObj: UowObject<Tx>): Promise<void> {
     return this.mark(() => this.creates.push(uowObj))
   }
 
   /** 
    * markUpdate caches object which is going to be updated
    */
-  protected markUpdate(uowObj: UnitOfWorkObject<Tx>): Promise<void> {
+  protected markUpdate(uowObj: UowObject<Tx>): Promise<void> {
     return this.mark(() => this.updates.push(uowObj))
   }
 
   /** 
    * markDelete caches object which is going to be deleted
    */
-  protected markDelete(uowObj: UnitOfWorkObject<Tx>): Promise<void> {
+  protected markDelete(uowObj: UowObject<Tx>): Promise<void> {
     return this.mark(() => this.deletes.push(uowObj))
   }
 

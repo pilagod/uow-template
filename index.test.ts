@@ -1,12 +1,12 @@
 import sinon from 'sinon'
 import { 
-  UnitOfWorkObject, 
-  UnitOfWorkTemplate 
+  Uow,
+  UowObject,
 } from './'
 
 type Tx = any
 
-class UowObject implements UnitOfWorkObject<Tx> {
+class UowObjectImpl implements UowObject<Tx> {
   public createByTx() {
     return Promise.resolve()    
   }
@@ -18,8 +18,7 @@ class UowObject implements UnitOfWorkObject<Tx> {
   }
 }
 
-class Uow extends UnitOfWorkTemplate<Tx> {
-
+class UowImpl extends Uow<Tx> {
   public constructor(public tx: Tx) {
     super()
   }
@@ -35,13 +34,13 @@ class Uow extends UnitOfWorkTemplate<Tx> {
   public release(tx: Tx) {
     return super.release(tx)
   }
-  public create(obj: UnitOfWorkObject<Tx>) {
+  public create(obj: UowObject<Tx>) {
     return this.markCreate(obj)
   }
-  public update(obj: UnitOfWorkObject<Tx>) {
+  public update(obj: UowObject<Tx>) {
     return this.markUpdate(obj)
   }
-  public delete(obj: UnitOfWorkObject<Tx>) {
+  public delete(obj: UowObject<Tx>) {
     return this.markDelete(obj)
   }
 }
@@ -51,8 +50,8 @@ describe('uow', () => {
 
   describe('without beginWork declaration', () => {
     it('should create object when object is marked create', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objCreateByTx = sinon.spy(obj, 'createByTx')
 
       await uow.create(obj)
@@ -62,8 +61,8 @@ describe('uow', () => {
     })
 
     it('should update object when object is marked update', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objUpdateByTx = sinon.spy(obj, 'updateByTx')
 
       await uow.update(obj)
@@ -73,8 +72,8 @@ describe('uow', () => {
     })
 
     it('should delete object when object is marked delete', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objDeleteByTx = sinon.spy(obj, 'deleteByTx')
 
       await uow.delete(obj)
@@ -86,8 +85,8 @@ describe('uow', () => {
 
   describe('with beginWork declaration', () => {
     it('should create object only when work is committed', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objCreateByTx = sinon.spy(obj, 'createByTx')
 
       uow.beginWork()
@@ -102,8 +101,8 @@ describe('uow', () => {
     })
 
     it('should update object only when work is committed', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objUpdateByTx = sinon.spy(obj, 'updateByTx')
 
       uow.beginWork()
@@ -118,8 +117,8 @@ describe('uow', () => {
     })
 
     it('should delete object only when work is committed', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objDeleteByTx = sinon.spy(obj, 'deleteByTx')
 
       uow.beginWork()
@@ -134,8 +133,8 @@ describe('uow', () => {
     })
 
     it('should do all actions only when work is committed', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objCreateByTx = sinon.spy(obj, 'createByTx')
       const objUpdateByTx = sinon.spy(obj, 'updateByTx')
       const objDeleteByTx = sinon.spy(obj, 'deleteByTx')
@@ -164,9 +163,9 @@ describe('uow', () => {
 
   describe('while committing', () => {
     it('should call uow commit with tx after all actions', async () => {
-      const uow = new Uow(tx)
+      const uow = new UowImpl(tx)
       const uowCommit = sinon.spy(uow, 'commit')
-      const obj = new UowObject()
+      const obj = new UowObjectImpl()
       const objCreateByTx = sinon.spy(obj, 'createByTx')
       const objUpdateByTx = sinon.spy(obj, 'updateByTx')
       const objDeleteByTx = sinon.spy(obj, 'deleteByTx')
@@ -185,9 +184,9 @@ describe('uow', () => {
     })
 
     it('should call uow rollback with tx and throw error when error occurs', async () => {
-      const uow = new Uow(tx)
+      const uow = new UowImpl(tx)
       const uowRollback = sinon.spy(uow, 'rollback')
-      const obj = new UowObject()
+      const obj = new UowObjectImpl()
       const updateError = new Error('An error occurs while updating')
 
       sinon.stub(obj, 'updateByTx').throws(updateError)
@@ -205,9 +204,9 @@ describe('uow', () => {
     })
 
     it('should not call uow rollback when no error occurs', async () => {
-      const uow = new Uow(tx)
+      const uow = new UowImpl(tx)
       const uowRollback = sinon.spy(uow, 'rollback')
-      const obj = new UowObject()
+      const obj = new UowObjectImpl()
 
       uow.beginWork()
       await uow.create(obj)
@@ -219,10 +218,10 @@ describe('uow', () => {
     })
 
     it('should call uow release with tx when no error occurs after commit', async () => {
-      const uow = new Uow(tx)
+      const uow = new UowImpl(tx)
       const uowCommit = sinon.spy(uow, 'commit')
       const uowRelease = sinon.spy(uow, 'release')
-      const obj = new UowObject()
+      const obj = new UowObjectImpl()
 
       uow.beginWork()
       await uow.create(obj)
@@ -234,10 +233,10 @@ describe('uow', () => {
     })
 
     it('should call uow release with tx when error occurs after rollback', async () => {
-      const uow = new Uow(tx)
+      const uow = new UowImpl(tx)
       const uowRollback = sinon.spy(uow, 'rollback')
       const uowRelease = sinon.spy(uow, 'release')
-      const obj = new UowObject()
+      const obj = new UowObjectImpl()
       const createError = new Error('An error occurs while creating')
 
       sinon.stub(obj, 'createByTx').throws(createError)
@@ -254,8 +253,8 @@ describe('uow', () => {
     })
 
     it('should reset uow state when commit succeeds', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const objCreateByTx = sinon.spy(obj, 'createByTx') 
       
       uow.beginWork()
@@ -269,8 +268,8 @@ describe('uow', () => {
     })
 
     it('should reset uow state when commit fails', async () => {
-      const uow = new Uow(tx)
-      const obj = new UowObject()
+      const uow = new UowImpl(tx)
+      const obj = new UowObjectImpl()
       const createError = new Error('An error occurs while creating')
       const objCreateByTx = sinon.stub(obj, 'createByTx').throws(createError)
 

@@ -20,6 +20,7 @@ Examples
 There are some pacakges demonstrates how to use and take advantage of `uow-template`:
 
 * [uow-typeorm](https://github.com/pilagod/uow-typeorm)
+* [uow-sequelize](https://github.com/pilagod/uow-sequelize)
 
 License
 -------
